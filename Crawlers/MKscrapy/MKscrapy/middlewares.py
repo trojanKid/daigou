@@ -144,7 +144,7 @@ class SeleniumDownloderMiddleware(object):
     #后期要把上面的注释解掉以增加封装性
         return cls()
 
-    def scroll_to_get_fullpage(self,driver):
+    def scroll_to_get_fullpage(self, driver):
         SCROLL_PAUSE_TIME = 3
         # Get scroll height
         last_height = driver.execute_script("return document.body.scrollHeight")
