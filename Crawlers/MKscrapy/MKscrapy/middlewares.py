@@ -6,6 +6,12 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from scrapy.http import HtmlResponse
+from logging import getLogger
+from selenium.webdriver.firefox.options import Options
+import time
 
 
 class MkscrapySpiderMiddleware(object):
@@ -101,3 +107,54 @@ class MkscrapyDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+
+class SeleniumDownloderMiddleware(object):
+
+    def __init__(self, timeout=None, service_args=[]):
+        self.logger = getLogger(__name__)
+        ff_options = Options()
+        # ff_options.add_argument('-headless')
+        self.browser = webdriver.Firefox(executable_path="/Library/HeadlessChrome/bin/geckodriver",
+                                         firefox_options=ff_options)
+
+    def __del__(self):
+        self.browser.close()
+
+    def process_request(self, request, spider):
+        """
+        用Headless FireFox抓取页面
+        :param request: Request对象
+        :param spider: Spider对象
+        :return: HtmlResponse
+        """
+        self.logger.debug('Headless FireFox is Starting')
+        try:
+            self.browser.get(request.url)
+            self.scroll_to_get_fullpage(self.browser)
+            return HtmlResponse(url=request.url, body=self.browser.page_source, request=request, encoding='utf-8',
+                                status=200)
+        except TimeoutException:
+            return HtmlResponse(url=request.url, status=500, request=request)
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        # return cls(timeout=crawler.settings.get('SELENIUM_TIMEOUT'),
+        #            service_args=crawler.settings.get('PHANTOMJS_SERVICE_ARGS'))
+    #后期要把上面的注释解掉以增加封装性
+        return cls()
+
+    def scroll_to_get_fullpage(self,driver):
+        SCROLL_PAUSE_TIME = 3
+        # Get scroll height
+        last_height = driver.execute_script("return document.body.scrollHeight")
+        while True:
+            # Scroll down to bottom
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            # Wait to load page
+            time.sleep(SCROLL_PAUSE_TIME)
+            # Calculate new scroll height and compare with last scroll height
+            new_height = driver.execute_script("return document.body.scrollHeight")
+            if new_height == last_height:
+                break
+            last_height = new_height
