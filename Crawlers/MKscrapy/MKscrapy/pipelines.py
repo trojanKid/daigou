@@ -40,5 +40,6 @@ class MkscrapyPipeline(object):
     def process_item(self, item, spider):
         line = json.dumps(dict(item), indent=4) + '\n'  # 加上indent后比较美观
         self.file.write(line)
-        self.db[self.today].insert_one(dict(item))
+        # if this product exists in the db, it will not be inserted again
+        self.db[self.today].update({'style_id': item['style_id']}, {'$set': dict(item)}, True)
         return item
