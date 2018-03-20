@@ -10,7 +10,8 @@ class MKspider(scrapy.Spider):
 
     def start_requests(self):
         urls = [
-            "https://www.michaelkors.com/sale/handbags/_/N-289z"
+            "https://www.michaelkors.com/sale/handbags/_/N-289z",
+            "https://www.michaelkors.com/women/handbags/_/N-28f3"
         ]
         for url in urls:
             yield Request(url, self.parse)
@@ -29,8 +30,10 @@ class MKspider(scrapy.Spider):
         else:
             print('Missing some products! Have:', have_sale_count, 'Get:', get_sale_count)
 
-        for product in products[5:10]:
+        for product in products[10:13]:
             item = MKSaleProductItem()
+            if product.find('div', class_='salePrice') is None:  # 本商品无折扣，跳过
+                continue
             link_tag = product.find('li', class_="product-name-container").find('a')
             item['style_id'] = link_tag['href'].split('_')[-1]
             item['product_name'] = link_tag.get_text()

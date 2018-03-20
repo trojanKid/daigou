@@ -8,7 +8,7 @@
 from MKscrapy import settings
 import json
 
-
+#同时写到文件与database中
 class MkscrapyPipeline(object):
     def open_spider(self, spider):
         self.file = open('items.jl', 'w')
@@ -19,4 +19,5 @@ class MkscrapyPipeline(object):
     def process_item(self, item, spider):  # 会在spider中有函数yield item 时触发么？
         line = json.dumps(dict(item), indent=4) + '\n'  # 加上indent后比较美观
         self.file.write(line)
+
         return item
