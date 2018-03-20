@@ -32,6 +32,8 @@ class MKSaleProductItem(scrapy.Item):
     sale_deadline = Field()  #  折扣结束日期
     rate_value = Field()  # 评分
     review_count = Field()  # 评论数
+    materials = Field()  # 材质
+    size = Field()  # 尺寸
 
 
 

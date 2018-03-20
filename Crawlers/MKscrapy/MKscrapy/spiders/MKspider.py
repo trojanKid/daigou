@@ -59,7 +59,10 @@ class MKspider(scrapy.Spider):
         else:
             item['is_available_now'] = True
             item['design_description'] = bs_detail.find('p', class_="design", itemprop="description").get_text()
-            item['details'] = bs_detail.find('div', class_="detail").get_text()
+            #  如果有回车格要去掉
+            item['details'] = bs_detail.find('div', class_="detail").get_text().replace("\n", "").split("\u2022")[1:]
+            item['materials'] = item['details'][0].strip()  # 材质, details每行以空格开始，所以用'[2:]'取出有用信息
+            item['size'] = item['details'][2].strip()  # 尺寸
             review = bs_detail.find('span', itemprop="reviewCount")
             if review is None:
                 item['review_count'] = 0
