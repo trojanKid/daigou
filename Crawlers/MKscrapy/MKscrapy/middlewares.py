@@ -130,10 +130,18 @@ class SeleniumDownloderMiddleware(object):
         """
         self.logger.debug('Headless FireFox is Starting')
         try:
-            self.browser.get(request.url)
-            self.scroll_to_get_fullpage(self.browser)
-            return HtmlResponse(url=request.url, body=self.browser.page_source, request=request, encoding='utf-8',
+            # 根据是list页还是detail页采取不同的策略
+            if not request.url.__contains__("R-US"):
+                self.browser.get(request.url)
+                self.scroll_to_get_fullpage(self.browser)
+                return HtmlResponse(url=request.url, body=self.browser.page_source, request=request, encoding='utf-8',
                                 status=200)
+            else:
+                self.browser.get(request.url)
+                time.sleep(5)
+                return HtmlResponse(url=request.url, body=self.browser.page_source, request=request, encoding='utf-8',
+                                    status=200)
+
         except TimeoutException:
             return HtmlResponse(url=request.url, status=500, request=request)
 
@@ -145,7 +153,7 @@ class SeleniumDownloderMiddleware(object):
         return cls()
 
     def scroll_to_get_fullpage(self, driver):
-        SCROLL_PAUSE_TIME = 3
+        SCROLL_PAUSE_TIME = 5
         # Get scroll height
         last_height = driver.execute_script("return document.body.scrollHeight")
         while True:
