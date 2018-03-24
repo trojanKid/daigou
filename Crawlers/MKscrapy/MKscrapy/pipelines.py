@@ -10,9 +10,9 @@ import json
 import time
 import pymongo
 
-#同时写到文件与database中
-class MkscrapyPipeline(object):
 
+# 同时写到文件与database中
+class MkscrapyPipeline(object):
     today = ''  # this is also the collection name of the mongodb
 
     def __init__(self, mongo_uri, mongo_db):
@@ -27,11 +27,11 @@ class MkscrapyPipeline(object):
         )
 
     def open_spider(self, spider):
-        self.today = 'd' + time.strftime('%Y_%m_%d', time.gmtime(time.time()))  # 获取当天的UTC时间，考虑到mongodb的命名规则，采取以下格式：d年_月_日
+        self.today = 'd' + time.strftime('%Y_%m_%d',
+                                         time.gmtime(time.time()))  # 获取当天的UTC时间，考虑到mongodb的命名规则，采取以下格式：d年_月_日
         self.file = open('files_gotten/products_json/Sale_Products_' + self.today + '.jl', 'w')
         self.client = pymongo.MongoClient(self.mongo_uri)
         self.db = self.client[self.mongo_db]
-
 
     def close_spider(self, spider):
         self.file.close()
